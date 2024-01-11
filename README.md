@@ -1,7 +1,7 @@
 # Spring Authorization Server With OAuth 2.0 Password Grant Implementation
 
 
-It's time to bid adieu to `spring-security-oauth2` and embrace the future with Spring Authorization Server. While aligning with the OAuth 2.1 draft specification, Spring Authorization Server doesn't provide built-in support for the password grant-type. For further details on OAuth 2.1, refer to this [link](https://www.miniorange.com/blog/what-is-oauth2-1-sso-protocol/). However, recognizing its significance, especially for direct integration with Angular/React/Vue, this repository offers a comprehensive template for implementing OAuth 2.0 password grant using Spring Authorization Server.
+It's time to bid adieu to `spring-security-oauth2` and embrace the future with Spring Authorization Server. While aligning with OAuth 2.1 draft specification, Spring Authorization Server doesn't provide built-in support for the password grant-type. For further details on OAuth 2.1, refer to this [link](https://www.miniorange.com/blog/what-is-oauth2-1-sso-protocol/). However, recognizing its significance, especially for direct integration with Angular/React/Vue, this repository offers a comprehensive template for implementing OAuth 2.0 password grant using Spring Authorization Server.
 
 ## Setup Instructions
 
