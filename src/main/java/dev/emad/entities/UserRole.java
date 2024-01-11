@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -16,6 +17,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity(name = "UserRole")
 @Table(name = "user_roles")
 public class UserRole implements Serializable {
@@ -37,10 +39,7 @@ public class UserRole implements Serializable {
   @NotNull(message = "Role cannot be null")
   private Role role;
 
-  public UserRole() {}
-
   public UserRole(Role role) {
-    this.id = UuidCreator.getRandomBased();
     this.role = role;
   }
 
