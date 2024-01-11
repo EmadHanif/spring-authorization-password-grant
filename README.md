@@ -26,7 +26,6 @@ Create a Java KeyStore file using the following command-line prompt, specifying 
 
 ```
 keytool -genkeypair -alias "$alias" -keyalg RSA -keysize 2048 -keystore ${keystore-filename}.jks -storepass "$password" -validity 3650
-
 ```
 
 Make relevant changes in `application.properties`.
@@ -35,7 +34,6 @@ Make relevant changes in `application.properties`.
 jwt.keystore.jks-location=keystore/[JWK_FILE.jks]
 jwt.keystore.keypair-alias=[JWK_ALIAS]
 jwt.keystore.password=[JWK_PASSWORD]
-
 ```
 Additionally, Spring Authorization Server provides the flexibility to configure the JWT keystore using base64 encoding, 
 
