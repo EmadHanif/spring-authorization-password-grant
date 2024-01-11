@@ -29,16 +29,16 @@ public class User implements UserDetails, Serializable {
   @Getter
   @Setter
   @Id
-  @Column(updatable = false, nullable = false, length = 30)
+  @Column(updatable = false, nullable = false, length = 50)
   private UUID id;
 
   @Getter
-  @Column(nullable = false, length = 50, unique = true)
-  @NotBlank(message = "Username is required.")
+  @Column(nullable = false, length = 50)
+  @NotBlank(message = "Full name is required.")
   @Length(
       min = 3,
       max = 20,
-      message = "FullName min. length needs to be 3 & max length needs to be 20.")
+      message = "Full name min. length needs to be 3 & max length needs to be 20.")
   private String fullName;
 
   @Setter
