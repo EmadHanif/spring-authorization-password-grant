@@ -64,7 +64,9 @@ public class JwtPreprocessor extends OncePerRequestFilter {
             (List<String>) claims.getOrDefault("authorities", Collections.emptyList());
 
         Set<SimpleGrantedAuthority> authoritySet =
-            authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
+            authorities.isEmpty()
+                ? Collections.emptySet()
+                : authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
 
         User user = new User();
         user.setId(UUID.fromString(id));

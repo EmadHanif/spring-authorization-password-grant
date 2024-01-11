@@ -157,12 +157,11 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
   }
 
   private Authentication getUsernamePasswordAuthentication(
-      OAuth2PasswordAuthenticationToken oAuth2PasswordAuthenticationToken) {
+      OAuth2PasswordAuthenticationToken authenticationToken) {
 
     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
         new UsernamePasswordAuthenticationToken(
-            oAuth2PasswordAuthenticationToken.getUsername(),
-            oAuth2PasswordAuthenticationToken.getPassword());
+            authenticationToken.getUsername(), authenticationToken.getPassword());
 
     return this.authenticationManager.authenticate(usernamePasswordAuthenticationToken);
   }

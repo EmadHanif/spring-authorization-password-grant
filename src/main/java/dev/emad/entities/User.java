@@ -94,8 +94,6 @@ public class User implements UserDetails, Serializable {
     return password;
   }
 
-  // This is a sample implementation; therefore always create a specific fields/columns for all
-  // these extended methods.
   @Override
   public boolean isAccountNonExpired() {
     return true;
@@ -147,7 +145,6 @@ public class User implements UserDetails, Serializable {
     return Objects.hashCode(id);
   }
 
-  // Convenience Methods.
   public void addUserRole(UserRole userRole) {
     this.userRoleSet.add(userRole);
     userRole.setUser(this);
