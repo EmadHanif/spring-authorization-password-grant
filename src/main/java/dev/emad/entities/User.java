@@ -61,9 +61,6 @@ public class User implements UserDetails, Serializable {
   @JsonIgnore
   private Set<UserRole> userRoleSet = new HashSet<>();
 
-  /*
-   This method gets invoked only when an entity is first saved to the database and not on updates.
-  */
   @PrePersist
   public void prePersist() {
     this.id = UuidCreator.getRandomBased();
