@@ -23,7 +23,7 @@ public class UserRole implements Serializable {
   @Serial private static final long serialVersionUID = 5763287331019765195L;
 
   @Id
-  @Column(length = 30, nullable = false, updatable = false)
+  @Column(length = 50, nullable = false, updatable = false)
   private UUID id;
 
   @ManyToOne(fetch = FetchType.LAZY)
