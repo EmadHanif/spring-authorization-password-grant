@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_access_token_value ON oauth2_authorization (access_token_value);
