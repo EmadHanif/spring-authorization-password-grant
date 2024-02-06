@@ -120,17 +120,6 @@ public class User implements UserDetails, Serializable {
   }
 
   @Override
-  public String toString() {
-    return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
-        .add("id=" + id)
-        .add("fullName='" + fullName + "'")
-        .add("password='" + password + "'")
-        .add("email='" + email + "'")
-        .add("userRoleSet=" + userRoleSet)
-        .toString();
-  }
-
-  @Override
   public boolean equals(Object object) {
     if (this == object) return true;
     if (object == null || getClass() != object.getClass()) return false;
