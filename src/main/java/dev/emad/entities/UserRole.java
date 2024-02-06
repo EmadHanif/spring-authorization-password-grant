@@ -40,6 +40,7 @@ public class UserRole implements Serializable {
   private Role role;
 
   public UserRole(Role role) {
+    this.id = UuidCreator.getRandomBased();
     this.role = role;
   }
 
@@ -56,10 +57,5 @@ public class UserRole implements Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  @PrePersist
-  public void prePersist() {
-    this.id = UuidCreator.getRandomBased();
   }
 }

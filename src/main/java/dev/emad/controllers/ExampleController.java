@@ -22,7 +22,7 @@ public class ExampleController {
   @GetMapping("/m2")
   @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
   public Map<String, Object> m2() {
-    return Map.of("message", "This method requires ROLE_ADMIN to access");
+    return Map.of("message", "You have the ROLE_ADMIN access.");
   }
 
   @GetMapping("/m3")
