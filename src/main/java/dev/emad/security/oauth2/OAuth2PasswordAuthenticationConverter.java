@@ -1,5 +1,6 @@
 package dev.emad.security.oauth2;
 
+import dev.emad.utils.StringHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
 import org.springframework.lang.Nullable;
@@ -28,23 +29,25 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
 
     MultiValueMap<String, String> parameters = getParameters(request);
 
-    // scope
+    // Defining Scope
     String scope = parameters.getFirst(OAuth2ParameterNames.SCOPE);
-    if (StringUtils.hasText(scope) && parameters.get(OAuth2ParameterNames.SCOPE).size() != 1)
+    if (StringHelper.hasText(scope) && parameters.get(OAuth2ParameterNames.SCOPE).size() != 1)
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
 
-    // username
+    // Defining Username
     String username = parameters.getFirst(OAuth2ParameterNames.USERNAME);
-    if (!StringUtils.hasText(username) || parameters.get(OAuth2ParameterNames.USERNAME).size() != 1)
+    if (!StringHelper.hasText(username)
+        || parameters.get(OAuth2ParameterNames.USERNAME).size() != 1)
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
 
-    // password
+    // Defining Password
     String password = parameters.getFirst(OAuth2ParameterNames.PASSWORD);
-    if (!StringUtils.hasText(password) || parameters.get(OAuth2ParameterNames.PASSWORD).size() != 1)
+    if (!StringHelper.hasText(password)
+        || parameters.get(OAuth2ParameterNames.PASSWORD).size() != 1)
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
 
     Set<String> requestedScopes = null;
-    if (StringUtils.hasText(scope)) {
+    if (StringHelper.hasText(scope)) {
       requestedScopes =
           new HashSet<>(Arrays.asList(StringUtils.delimitedListToStringArray(scope, " ")));
     }

@@ -31,7 +31,7 @@ public class StringHelper {
     }
   }
 
-  public static boolean hasLength(@Nullable String str) {
+  private static boolean hasLength(@Nullable String str) {
     return str != null && !str.isEmpty();
   }
 

@@ -1,7 +1,10 @@
-package dev.emad.entities;
+package dev.emad.entities.relationship;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.f4b6a3.uuid.UuidCreator;
+import dev.emad.entities.Role;
+import dev.emad.entities.User;
+import dev.emad.entities.relationship.key.UserRoleKey;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
@@ -22,25 +25,26 @@ import lombok.Setter;
 @Table(name = "user_roles")
 public class UserRole implements Serializable {
 
-  @Serial private static final long serialVersionUID = 5763287331019765195L;
+  @Serial private static final long serialVersionUID = 3337103535110458089L;
 
-  @Id
-  @Column(length = 50, nullable = false, updatable = false)
-  private UUID id;
+  @EmbeddedId private UserRoleKey id;
 
   @ManyToOne(fetch = FetchType.LAZY)
+  @MapsId("userId")
   @JoinColumn(name = "user_fk")
   @NotNull(message = "User cannot be null.")
-  @JsonIgnore
+  @JsonIgnore // Added to avoid infinite recursion
   private User user;
 
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @MapsId("roleId")
   @JoinColumn(name = "role_fk")
   @NotNull(message = "Role cannot be null")
   private Role role;
 
-  public UserRole(Role role) {
-    this.id = UuidCreator.getRandomBased();
+  public UserRole(User user, Role role) {
+    this.id = new UserRoleKey(user.getId(), role.getId());
+    this.user = user;
     this.role = role;
   }
 

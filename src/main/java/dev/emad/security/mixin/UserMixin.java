@@ -12,6 +12,7 @@ public abstract class UserMixin {
   @JsonCreator
   public UserMixin(
       @JsonProperty("id") UUID id,
+      @JsonProperty("fullName") String fullName,
       @JsonProperty("password") String password,
       @JsonProperty("email") String email) {}
 }

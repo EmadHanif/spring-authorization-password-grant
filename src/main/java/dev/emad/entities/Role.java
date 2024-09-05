@@ -1,10 +1,12 @@
 package dev.emad.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import dev.emad.entities.relationship.UserRole;
 import jakarta.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import lombok.AccessLevel;
@@ -20,12 +22,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity(name = "Role")
 @Table(name = "roles")
-@JsonIgnoreProperties(value = {"id"})
 public class Role implements Serializable {
 
-  @Serial @Transient private static final long serialVersionUID = -5146249894814286445L;
+  @Serial private static final long serialVersionUID = -5146249894814286445L;
 
   @Id
+  // Replace it with Snowflake-Like implementation
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Setter(AccessLevel.NONE)
   private Long id;
@@ -39,5 +41,18 @@ public class Role implements Serializable {
 
   public Role(String name) {
     this.name = name;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Role role = (Role) o;
+    return Objects.equals(id, role.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(id);
   }
 }

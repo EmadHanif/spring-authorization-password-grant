@@ -137,6 +137,7 @@ public class AuthenticationServerConfig {
 
     ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
 
+    // Some unnecessary modules are added for the purpose of demonstration...
     objectMapper.registerModules(SecurityJackson2Modules.getModules(classLoader));
     objectMapper.registerModule(new CoreJackson2Module());
     objectMapper.registerModule(new JavaTimeModule());

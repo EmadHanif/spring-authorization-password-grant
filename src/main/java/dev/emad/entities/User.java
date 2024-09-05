@@ -2,6 +2,7 @@ package dev.emad.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.f4b6a3.uuid.UuidCreator;
+import dev.emad.entities.relationship.UserRole;
 import dev.emad.utils.StringHelper;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -24,12 +25,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Entity(name = "User")
 public class User implements UserDetails, Serializable {
 
-  @Serial @Transient private static final long serialVersionUID = 3625145227376574078L;
+  @Serial private static final long serialVersionUID = 3625145227376574078L;
 
+  // This is just for the example.
+  // Replace UUID with Long (always prefer Snowflake-like implementation)
+  // Always avoid using UUIDs as a primary-key.
+  // Good Practice: Create & Use Annotations to implement it...
   @Getter
-  @Setter
+  @Setter // Necessary for JwtPreprocessor (based on your requirements)
   @Id
-  @Column(updatable = false, nullable = false, length = 50)
+  @Column(updatable = false)
   private UUID id;
 
   @Getter
@@ -42,11 +47,11 @@ public class User implements UserDetails, Serializable {
   private String fullName;
 
   @Setter
-  @Column(nullable = false, length = 255)
+  @Column(nullable = false)
   private String password;
 
   @Getter
-  @Column(nullable = false, length = 255, unique = true)
+  @Column(nullable = false, unique = true)
   @NotBlank(message = "Email is required,")
   @Email(message = "Email appears to be invalid.")
   private String email;
@@ -54,16 +59,32 @@ public class User implements UserDetails, Serializable {
   // User Role
   @Getter
   @OneToMany(
-      fetch = FetchType.EAGER,
+      fetch = FetchType.LAZY,
       cascade = CascadeType.ALL,
       orphanRemoval = true,
       mappedBy = "user")
-  @JsonIgnore
+  @JsonIgnore // Added to avoid infinite recursion
   private Set<UserRole> userRoleSet = new HashSet<>();
+
+  @Transient private Collection<? extends GrantedAuthority> authorities;
+
+  public void addUserRole(Role role) {
+
+    if (Objects.isNull(role)) throw new IllegalArgumentException("Role cannot be null.");
+
+    // Case: When updating the user roles
+    if (Objects.isNull(this.id)) {
+      this.id = UuidCreator.getRandomBased();
+    }
+    UserRole userRole = new UserRole(this, role);
+    this.userRoleSet.add(userRole);
+  }
 
   @PrePersist
   public void prePersist() {
-    this.id = UuidCreator.getRandomBased();
+    if (Objects.isNull(this.id)) {
+      this.id = UuidCreator.getRandomBased();
+    }
   }
 
   @Override
@@ -74,8 +95,6 @@ public class User implements UserDetails, Serializable {
             authorities.add(new SimpleGrantedAuthority(user.getRole().getName().toUpperCase())));
     return authorities;
   }
-
-  @Transient private Collection<? extends GrantedAuthority> authorities;
 
   public void setFullName(String fullName) {
     this.fullName = StringHelper.changeFirstCharacterCase(fullName, true);
@@ -94,6 +113,7 @@ public class User implements UserDetails, Serializable {
     return password;
   }
 
+  // Must be added to db fields (a good prc is to use one-to-one table)
   @Override
   public boolean isAccountNonExpired() {
     return true;
@@ -132,10 +152,5 @@ public class User implements UserDetails, Serializable {
   @Override
   public int hashCode() {
     return Objects.hashCode(id);
-  }
-
-  public void addUserRole(UserRole userRole) {
-    this.userRoleSet.add(userRole);
-    userRole.setUser(this);
   }
 }

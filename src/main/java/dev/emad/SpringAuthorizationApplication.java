@@ -1,15 +1,14 @@
 package dev.emad;
 
-import com.github.f4b6a3.uuid.UuidCreator;
 import dev.emad.configuration.SpringConfigProperties;
 import dev.emad.entities.Role;
 import dev.emad.entities.User;
-import dev.emad.entities.UserRole;
 import dev.emad.repositories.RoleRepository;
 import dev.emad.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import dev.emad.security.config.SecurityManager;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +19,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,6 +38,8 @@ public class SpringAuthorizationApplication implements CommandLineRunner {
   private final TokenSettings tokenSettings;
   private final ClientSettings clientSettings;
   private final RegisteredClientRepository registeredClientRepository;
+
+  @PersistenceContext private EntityManager entityManager;
 
   public SpringAuthorizationApplication(
       RoleRepository roleRepository,
@@ -63,20 +65,33 @@ public class SpringAuthorizationApplication implements CommandLineRunner {
   @Override
   public void run(String... args) {
 
-    /* This is a classical implementation to create user & store it in db; */
+    /*
+    This is a just an example to create user which is being invoked in CommandLineRunner
+    The core purpose of this repository is to implement a template for OAuth2.0 Password Grant Authentication
+    Using Spring Authorization Server (replacing spring-security-oauth2.0)
+    */
+
+    /*
+    Generally, my recommendation is to create your own implementation which entails
+    persistOrUpdate(obj), persistOrUpdateInBatch(obj) removeAllInBatch, remove(obj) impl
+    via EntityManager
+     */
     Role role = new Role();
     role.setName("ROLE_ADMIN");
 
-    role = roleRepository.save(role);
+    // Saving Role...
+    role = this.roleRepository.save(role);
 
     User user = new User();
     user.setEmail("david_freed@gmail.com");
     user.setFullName("David Freed");
-    user.setPassword(passwordEncoder.encode("adminadmin"));
-    user.addUserRole(new UserRole(role));
+    user.setPassword(this.passwordEncoder.encode("adminadmin"));
+
+    // Adding role...
+    user.addUserRole(role);
 
     // User created & storing in db.
-    userRepository.save(user);
+    this.userRepository.save(user);
 
     // This is a classical example to create RegisteredClient...
     Set<String> redirectUrisSet =
@@ -84,7 +99,7 @@ public class SpringAuthorizationApplication implements CommandLineRunner {
             Arrays.asList(springConfigProperties.getSecurity().getRedirectUris().split(",")));
 
     RegisteredClient registeredClient =
-        RegisteredClient.withId(UuidCreator.getRandomBased().toString())
+        RegisteredClient.withId(SecurityManager.REGISTERED_CLIENT_ID)
             .clientId("spring-angular")
             .clientSecret(passwordEncoder.encode("spring-angular-client-key"))
             .scope("read")
@@ -97,10 +112,10 @@ public class SpringAuthorizationApplication implements CommandLineRunner {
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
             .authorizationGrantType(AuthorizationGrantType.PASSWORD)
-            .tokenSettings(tokenSettings)
-            .clientSettings(clientSettings)
+            .tokenSettings(this.tokenSettings)
+            .clientSettings(this.clientSettings)
             .build();
 
-    registeredClientRepository.save(registeredClient);
+    this.registeredClientRepository.save(registeredClient);
   }
 }

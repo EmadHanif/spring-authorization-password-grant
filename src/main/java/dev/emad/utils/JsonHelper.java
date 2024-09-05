@@ -36,7 +36,7 @@ public class JsonHelper {
     try {
       return objectMapper.writeValueAsString(object);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed to convert object to JSON: " + e.getMessage());
+      throw new RuntimeException("Failed to convert Object to JSON: " + e.getMessage());
     }
   }
 
@@ -44,7 +44,7 @@ public class JsonHelper {
     try {
       return objectMapper.writer().withDefaultPrettyPrinter().writeValueAsString(object);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed to convert object to JSON: " + e.getMessage());
+      throw new RuntimeException("Failed to convert Object to JSON: " + e.getMessage());
     }
   }
 
@@ -56,7 +56,7 @@ public class JsonHelper {
     try {
       return objectMapper.readValue(jsonString, clazz);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed to convert Json to object: " + e.getMessage());
+      throw new RuntimeException("Failed to convert JSON to Object: " + e.getMessage());
     }
   }
 
