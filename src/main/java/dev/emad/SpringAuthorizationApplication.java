@@ -6,8 +6,6 @@ import dev.emad.entities.User;
 import dev.emad.repositories.RoleRepository;
 import dev.emad.repositories.UserRepository;
 import dev.emad.security.config.SecurityManager;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -19,7 +17,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,8 +36,6 @@ public class SpringAuthorizationApplication implements CommandLineRunner {
   private final TokenSettings tokenSettings;
   private final ClientSettings clientSettings;
   private final RegisteredClientRepository registeredClientRepository;
-
-  @PersistenceContext private EntityManager entityManager;
 
   public SpringAuthorizationApplication(
       RoleRepository roleRepository,

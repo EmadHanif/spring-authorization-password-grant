@@ -1,7 +1,6 @@
 package dev.emad.configuration;
 
 import jakarta.validation.constraints.NotBlank;
-import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;

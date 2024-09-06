@@ -1,6 +1,5 @@
 package dev.emad.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.emad.entities.relationship.UserRole;
 import jakarta.persistence.*;
 import java.io.Serial;

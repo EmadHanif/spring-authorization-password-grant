@@ -1,7 +1,6 @@
 package dev.emad.exceptions;
 
 import java.time.LocalDateTime;
-import lombok.*;
 
 /**
  * @author EmadHanif
