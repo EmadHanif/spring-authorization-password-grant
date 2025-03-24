@@ -6,8 +6,8 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <version>3.4.3</version>
+        <relativePath/>
     </parent>
 
     <groupId>dev.emad</groupId>
@@ -22,8 +22,8 @@
         <flyway.version>10.1.0</flyway.version>
         <lombok.version>1.18.30</lombok.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-        <springauthresource.version>6.2.0</springauthresource.version>
-        <springauth.version>1.2.0</springauth.version>
+        <spring-auth-resource.version>6.2.0</spring-auth-resource.version>
+        <spring-auth.version>1.2.0</spring-auth.version>
         <rxjava.version>3.1.8</rxjava.version>
     </properties>
 
@@ -50,13 +50,13 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-resource-server</artifactId>
-            <version>${springauthresource.version}</version>
+            <version>${spring-auth-resource.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
-            <version>${springauth.version}</version>
+            <version>${spring-auth.version}</version>
         </dependency>
 
         <!-- Flyway -->

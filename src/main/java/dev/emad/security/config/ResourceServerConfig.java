@@ -96,11 +96,17 @@ public class ResourceServerConfig {
     return source;
   }
 
+  //  @Bean
+  //  public FilterRegistrationBean<CorsFilter> corsFilter(CorsConfigurationSource
+  // corsConfiguration) {
+  //    FilterRegistrationBean<CorsFilter> bean =
+  //        new FilterRegistrationBean<>(new CorsFilter(corsConfiguration));
+  //    bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+  //    return bean;
+  //  }
+
   @Bean
-  public FilterRegistrationBean<CorsFilter> corsFilter(CorsConfigurationSource corsConfiguration) {
-    FilterRegistrationBean<CorsFilter> bean =
-        new FilterRegistrationBean<>(new CorsFilter(corsConfiguration));
-    bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-    return bean;
+  public CorsFilter corsFilter(CorsConfigurationSource corsConfiguration) {
+    return new CorsFilter(corsConfiguration);
   }
 }
