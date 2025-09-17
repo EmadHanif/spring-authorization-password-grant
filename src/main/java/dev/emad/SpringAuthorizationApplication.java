@@ -107,7 +107,7 @@ public class SpringAuthorizationApplication implements CommandLineRunner {
             .redirectUris(uris -> uris.addAll(redirectUrisSet))
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-            .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+            .authorizationGrantType(new AuthorizationGrantType("password"))
             .tokenSettings(this.tokenSettings)
             .clientSettings(this.clientSettings)
             .build();

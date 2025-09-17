@@ -6,24 +6,23 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.3</version>
+        <version>3.5.5</version>
         <relativePath/>
     </parent>
 
     <groupId>dev.emad</groupId>
     <artifactId>spring-authorization-password-grant</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>spring-authorization-password-grant</name>
     <description>Implementation of OAuth2 Password Grant...</description>
 
     <properties>
-        <java.version>21</java.version>
-        <lombok.version>1.18.30</lombok.version>
+        <java.version>25</java.version>
+        <lombok.version>1.18.40</lombok.version>
         <flyway.version>10.1.0</flyway.version>
-        <lombok.version>1.18.30</lombok.version>
         <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-        <spring-auth-resource.version>6.2.0</spring-auth-resource.version>
-        <spring-auth.version>1.2.0</spring-auth.version>
+        <spring.auth.resource.version>6.5.4</spring.auth.resource.version>
+        <spring.auth.version>1.5.2</spring.auth.version>
         <rxjava.version>3.1.8</rxjava.version>
     </properties>
 
@@ -50,13 +49,13 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-resource-server</artifactId>
-            <version>${spring-auth-resource.version}</version>
+            <version>${spring.auth.resource.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
-            <version>${spring-auth.version}</version>
+            <version>${spring.auth.version}</version>
         </dependency>
 
         <!-- Flyway -->

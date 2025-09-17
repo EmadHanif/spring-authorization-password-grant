@@ -60,11 +60,11 @@ import org.springframework.security.oauth2.server.authorization.settings.ClientS
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
-import org.springframework.security.oauth2.server.authorization.web.authentication.DelegatingAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
 
 /**
  * @author EmadHanif
@@ -84,7 +84,14 @@ public class AuthenticationServerConfig {
       JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint)
       throws Exception {
 
-    OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+    //    OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+
+    OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+        OAuth2AuthorizationServerConfigurer.authorizationServer();
+
+    http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+        .with(authorizationServerConfigurer, withDefaults())
+        .authorizeHttpRequests((authorize) -> (authorize.anyRequest()).authenticated());
 
     http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
         .tokenEndpoint(
@@ -117,8 +124,7 @@ public class AuthenticationServerConfig {
   @Bean
   public DaoAuthenticationProvider authenticationProvider(
       UserDetailsService userDetailsService, PasswordEncoder encoder) {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(userDetailsService);
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
     authProvider.setPasswordEncoder(encoder);
     return authProvider;
   }
@@ -171,7 +177,7 @@ public class AuthenticationServerConfig {
         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
         .accessTokenTimeToLive(Duration.ofHours(24))
         .reuseRefreshTokens(false)
-        .refreshTokenTimeToLive(Duration.ofDays(30))
+        .refreshTokenTimeToLive(Duration.ofDays(7))
         .build();
   }
 

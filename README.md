@@ -1,15 +1,10 @@
 # Spring Authorization Server With OAuth 2.0 Password Grant Implementation
 
-
-It's time to bid adieu to `spring-security-oauth2` and embrace the future with Spring Authorization Server. While aligning with OAuth 2.1 draft specification, Spring Authorization Server doesn't provide built-in support for the password grant-type. For further details on OAuth 2.1, refer to this [link](https://www.miniorange.com/blog/what-is-oauth2-1-sso-protocol/). However, recognizing its significance, especially for direct integration with Angular/React/Vue, this repository offers a comprehensive template for implementing OAuth 2.0 password grant using Spring Authorization Server.
+It's time to bid adieu to `spring-security-oauth2` and embrace the future with Spring Authorization Server. While aligning with OAuth 2.1 draft specification, Spring Authorization Server doesn't provide built-in support for the password grant-type. For further details on OAuth 2.1, refer to this [link](https://www.miniorange.com/blog/what-is-oauth2-1-sso-protocol/). However, recognizing its significance, especially for direct integration with Angular/React/Vue, this repository provides a comprehensive template for implementing OAuth 2.0 password grant using Spring Authorization Server.
 
 ## Setup Instructions
 
-### 1. Prerequisites
-
-The repository requires Java 21, leveraging virtual threads, and Spring Boot 3.0.
-
-### 2. Database Configuration
+### 1. Database Configuration
 
 The implementation is configured with PostgreSQL. Ensure that the database configuration in `application-dev.properties` matches your setup:
 
@@ -20,7 +15,7 @@ config.database-config.password=[DB_PASSWORD]
 ```
 Replace `[DATABASE_NAME]` and `[DB_PASSWORD]` with your database details.
 
-### 3. Java KeyStore Configuration
+### 2. Java KeyStore Configuration
 
 Create a Java KeyStore file using the following command-line prompt, specifying alias, filename, and password:
 
@@ -35,12 +30,12 @@ jwt.keystore.jks-location=keystore/[JWK_FILE.jks]
 jwt.keystore.keypair-alias=[JWK_ALIAS]
 jwt.keystore.password=[JWK_PASSWORD]
 ```
-Additionally, Spring Authorization Server provides the flexibility to configure the JWT keystore using base64 encoding, 
+Additionally, Spring Authorization Server provides the flexibility to configure the JWT keystore using base64 encoding,
 
 
-## Endpoints & Testing 
+## Endpoints & Testing
 
-## 1. Available Endpoints
+### 1. Available Endpoints
 `POST /oauth2/token`: Generates access and refresh tokens.
 
 `POST /oauth2/introspection`: Inspects access tokens.
@@ -68,7 +63,7 @@ curl --location --request POST 'http://localhost:8080/oauth2/token' \
 --form 'refresh_token="${your_refresh_token}"'
 ```
 
-While this repository serves as an extensive Spring Security implementation template, it is crucial to highlight best practices. Particularly, the recommended practice is to handle `refresh_tokens` on the server-side and securely storing them as cookies.
+The recommended approach for `refresh_tokens` is to handle them server-side and store them securely as cookies upon successful authentication
 
 #### Token introspection
 
@@ -78,6 +73,6 @@ curl --location --request POST 'http://localhost:8080/oauth2/introspect' \
 --form 'token="${your_access_token}"'
 ```
 
-## 🙏 Acknowledgement
+## Acknowledgement
 
-Huge shootout to the Spring Team for redefining standards & pioneering advancements within the Java Ecosystem. 
+Special thanks to the Spring Team for redefining standards and pioneering advancements within the Java ecosystem.
