@@ -1,17 +1,17 @@
 package dev.emad.controllers;
 
 import io.reactivex.rxjava3.core.Single;
+import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.Map;
 
 /*
  @author EmadHanif
 */
 @RestController
-@RequestMapping("/v1/examples")
+@RequestMapping("/api/v1/example")
 public class ExampleController {
 
   @GetMapping("/m1")

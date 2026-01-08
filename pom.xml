@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>4.0.1</version>
         <relativePath/>
     </parent>
 
@@ -18,14 +18,11 @@
 
     <properties>
         <java.version>25</java.version>
-        <lombok.version>1.18.40</lombok.version>
-        <flyway.version>10.1.0</flyway.version>
-        <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
-        <spring.auth.resource.version>6.5.4</spring.auth.resource.version>
-        <spring.auth.version>1.5.2</spring.auth.version>
-        <rxjava.version>3.1.8</rxjava.version>
+        <lombok.version>1.18.42</lombok.version>
+        <hibernate.validator.version>9.1.0.Final</hibernate.validator.version>
+        <spring.auth.version>7.0.2</spring.auth.version>
+        <rxjava.version>3.1.12</rxjava.version>
     </properties>
-
 
     <dependencies>
 
@@ -49,26 +46,13 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-resource-server</artifactId>
-            <version>${spring.auth.resource.version}</version>
+            <version>${spring.auth.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-oauth2-authorization-server</artifactId>
             <version>${spring.auth.version}</version>
-        </dependency>
-
-        <!-- Flyway -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>${flyway.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-            <version>${flyway.version}</version>
         </dependency>
 
         <!-- PostgreSQL Deps -->
@@ -98,13 +82,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.f4b6a3</groupId>
-            <artifactId>uuid-creator</artifactId>
-            <version>5.2.0</version>
-        </dependency>
-
-
-        <dependency>
             <groupId>io.reactivex.rxjava3</groupId>
             <artifactId>rxjava</artifactId>
             <version>${rxjava.version}</version>
@@ -118,6 +95,7 @@
 
 
     </dependencies>
+
 
     <build>
         <plugins>

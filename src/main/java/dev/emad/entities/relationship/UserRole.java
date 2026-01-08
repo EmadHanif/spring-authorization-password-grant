@@ -1,7 +1,6 @@
 package dev.emad.entities.relationship;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.f4b6a3.uuid.UuidCreator;
 import dev.emad.entities.Role;
 import dev.emad.entities.User;
 import dev.emad.entities.relationship.key.UserRoleKey;
@@ -10,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

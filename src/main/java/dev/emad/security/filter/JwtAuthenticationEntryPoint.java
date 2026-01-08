@@ -1,17 +1,17 @@
 package dev.emad.security.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
-import org.springframework.http.HttpStatus;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * @author EmadHanif
@@ -27,18 +27,19 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
   @Override
   public void commence(
-      HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)
+      @NonNull HttpServletRequest request,
+      HttpServletResponse response,
+      AuthenticationException exception)
       throws IOException {
+
     response.setContentType("application/json");
-    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-    Map<String, Object> data = new HashMap<>();
-
-    data.put("message", exception.getMessage());
-    data.put("dateTime", LocalDateTime.now());
+    Map<String, ? extends Serializable> errorMessage =
+        Map.of("message", exception.getMessage(), "timestamp", LocalDateTime.now());
 
     try (OutputStream out = response.getOutputStream()) {
-      objectMapper.writeValue(out, data);
+      objectMapper.writeValue(out, errorMessage);
     }
   }
 }

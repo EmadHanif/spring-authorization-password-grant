@@ -16,10 +16,7 @@ import org.springframework.validation.annotation.Validated;
 @Setter
 @ConfigurationProperties("jwt.keystore")
 public class JwtKeyStoreProperties {
-
   @NotBlank private String jksLocation;
-
   @NotBlank private String password;
-
   @NotBlank private String keypairAlias;
 }

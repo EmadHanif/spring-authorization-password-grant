@@ -1,33 +1,21 @@
 package dev.emad.security.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import dev.emad.configuration.JwtKeyStoreProperties;
+import dev.emad.configuration.SpringConfigProperties;
+import dev.emad.entities.User;
+import dev.emad.security.oauth2.OAuth2PasswordAuthenticationConverter;
+import dev.emad.security.oauth2.OAuth2PasswordAuthenticationProvider;
 import java.io.File;
 import java.security.KeyStore;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import dev.emad.configuration.JwtKeyStoreProperties;
-import dev.emad.configuration.SpringConfigProperties;
-import dev.emad.entities.User;
-import dev.emad.security.filter.JwtAuthenticationEntryPoint;
-import dev.emad.security.mixin.UUIDMixin;
-import dev.emad.security.mixin.UserMixin;
-import dev.emad.security.oauth2.OAuth2PasswordAuthenticationConverter;
-import dev.emad.security.oauth2.OAuth2PasswordAuthenticationProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -39,22 +27,23 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.jackson2.CoreJackson2Module;
-import org.springframework.security.jackson2.SecurityJackson2Modules;
+import org.springframework.security.jackson.CoreJacksonModule;
+import org.springframework.security.jackson.SecurityJacksonModules;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.*;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
-import org.springframework.security.oauth2.server.authorization.jackson2.OAuth2AuthorizationServerJackson2Module;
+import org.springframework.security.oauth2.server.authorization.jackson.OAuth2AuthorizationServerJacksonModule;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
@@ -63,8 +52,12 @@ import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2AuthorizationCodeAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2ClientCredentialsAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.OAuth2RefreshTokenAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.DelegatingAuthenticationConverter;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 
 /**
  * @author EmadHanif
@@ -75,44 +68,34 @@ import org.springframework.security.web.authentication.DelegatingAuthenticationC
 public class AuthenticationServerConfig {
 
   @Bean
-  @Order(Ordered.HIGHEST_PRECEDENCE)
+  @Order(1)
   public SecurityFilterChain asSecurityFilterChain(
       HttpSecurity http,
       AuthenticationManager authenticationManager,
       OAuth2AuthorizationService authorizationService,
-      OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator,
-      JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint)
-      throws Exception {
+      OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
 
-    //    OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+    OAuth2AuthorizationServerConfigurer authServerConfigurer =
+        new OAuth2AuthorizationServerConfigurer();
 
-    OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-        OAuth2AuthorizationServerConfigurer.authorizationServer();
-
-    http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
-        .with(authorizationServerConfigurer, withDefaults())
-        .authorizeHttpRequests((authorize) -> (authorize.anyRequest()).authenticated());
-
-    http.getConfigurer(OAuth2AuthorizationServerConfigurer.class)
-        .tokenEndpoint(
-            tokenEndpoint ->
-                tokenEndpoint
-                    .accessTokenRequestConverter(
-                        new DelegatingAuthenticationConverter(
-                            Arrays.asList(
-                                new OAuth2AuthorizationCodeAuthenticationConverter(),
-                                new OAuth2RefreshTokenAuthenticationConverter(),
-                                new OAuth2ClientCredentialsAuthenticationConverter(),
-                                new OAuth2PasswordAuthenticationConverter())))
-                    .authenticationProvider(
-                        new OAuth2PasswordAuthenticationProvider(
-                            authenticationManager, authorizationService, tokenGenerator)));
-    return http.formLogin(withDefaults())
-        .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
-        .exceptionHandling(
-            exceptionHandling ->
-                exceptionHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-        .build();
+    http.securityMatcher(authServerConfigurer.getEndpointsMatcher())
+        .with(
+            authServerConfigurer,
+            authServer ->
+                authServer.tokenEndpoint(
+                    tokenEndpoint ->
+                        tokenEndpoint
+                            .accessTokenRequestConverter(
+                                new DelegatingAuthenticationConverter(
+                                    Arrays.asList(
+                                        new OAuth2AuthorizationCodeAuthenticationConverter(),
+                                        new OAuth2RefreshTokenAuthenticationConverter(),
+                                        new OAuth2ClientCredentialsAuthenticationConverter(),
+                                        new OAuth2PasswordAuthenticationConverter())))
+                            .authenticationProvider(
+                                new OAuth2PasswordAuthenticationProvider(
+                                    authenticationManager, authorizationService, tokenGenerator))));
+    return http.build();
   }
 
   @Bean
@@ -136,28 +119,30 @@ public class AuthenticationServerConfig {
     JdbcOAuth2AuthorizationService authorizationService =
         new JdbcOAuth2AuthorizationService(jdbcOperations, registeredClientRepository);
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false);
-    objectMapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
-
     ClassLoader classLoader = JdbcOAuth2AuthorizationService.class.getClassLoader();
 
-    // Some unnecessary modules are added for the purpose of demonstration...
-    objectMapper.registerModules(SecurityJackson2Modules.getModules(classLoader));
-    objectMapper.registerModule(new CoreJackson2Module());
-    objectMapper.registerModule(new JavaTimeModule());
-    objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-    objectMapper.registerModule(new ParameterNamesModule());
-    objectMapper.registerModule(new Jdk8Module());
+    BasicPolymorphicTypeValidator.Builder ptvb =
+        BasicPolymorphicTypeValidator.builder()
+            .allowIfSubType(User.class)
+            .allowIfSubType(SimpleGrantedAuthority.class)
+            .allowIfSubType(Long.class);
 
-    objectMapper.addMixIn(UUID.class, UUIDMixin.class);
-    objectMapper.addMixIn(User.class, UserMixin.class);
+    JsonMapper jsonMapper =
+        JsonMapper.builder()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)
+            .addModules(SecurityJacksonModules.getModules(classLoader, ptvb))
+            .addModule(new OAuth2AuthorizationServerJacksonModule())
+            .addModule(new CoreJacksonModule())
+            .build();
 
-    JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper rowMapper =
-        new JdbcOAuth2AuthorizationService.OAuth2AuthorizationRowMapper(registeredClientRepository);
-    rowMapper.setObjectMapper(objectMapper);
+    JdbcOAuth2AuthorizationService.JsonMapperOAuth2AuthorizationRowMapper rowMapper =
+        new JdbcOAuth2AuthorizationService.JsonMapperOAuth2AuthorizationRowMapper(
+            registeredClientRepository, jsonMapper);
+
     authorizationService.setAuthorizationRowMapper(rowMapper);
+
     return authorizationService;
   }
 
@@ -176,6 +161,7 @@ public class AuthenticationServerConfig {
     return TokenSettings.builder()
         .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
         .accessTokenTimeToLive(Duration.ofHours(24))
+        .x509CertificateBoundAccessTokens(false)
         .reuseRefreshTokens(false)
         .refreshTokenTimeToLive(Duration.ofDays(7))
         .build();
@@ -191,8 +177,7 @@ public class AuthenticationServerConfig {
       SpringConfigProperties springConfigProperties) {
     return AuthorizationServerSettings.builder()
         .issuer(springConfigProperties.getSecurity().getIssuer())
-        .tokenEndpoint(
-            springConfigProperties.getSecurity().getTokenEndpoint()) // Your desired endpoint
+        .tokenEndpoint(springConfigProperties.getSecurity().getTokenEndpoint())
         .build();
   }
 
@@ -231,6 +216,7 @@ public class AuthenticationServerConfig {
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
+
         if (context.getTokenType().getValue().equals("access_token")) {
           context
               .getClaims()
@@ -240,6 +226,32 @@ public class AuthenticationServerConfig {
         }
       }
     };
+  }
+
+  @Bean
+  public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+
+    converter.setJwtGrantedAuthoritiesConverter(
+        jwt -> {
+          List<GrantedAuthority> authorities = new ArrayList<>();
+
+          // Get scope claim
+          List<String> scopeList = jwt.getClaimAsStringList("scope");
+
+          if (scopeList != null && !scopeList.isEmpty()) {
+            scopeList.forEach(
+                scope -> authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope)));
+          }
+
+          // Get authorities claim
+          List<String> roleList = jwt.getClaimAsStringList("authorities");
+          roleList.forEach(role -> authorities.add(new SimpleGrantedAuthority(role)));
+
+          return authorities;
+        });
+
+    return converter;
   }
 
   @Bean

@@ -1,6 +1,7 @@
 package dev.emad.configuration;
 
 import jakarta.validation.constraints.NotBlank;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -30,9 +31,9 @@ public class SpringConfigProperties {
   @Getter
   @Setter
   public static class Security {
-    @NotBlank private String redirectUris;
+    @NotBlank private Set<String> redirectUris;
     @NotBlank private String tokenEndpoint;
     @NotBlank private String issuer;
-    @NotBlank private String cors;
+    @NotBlank private Set<String> cors;
   }
 }

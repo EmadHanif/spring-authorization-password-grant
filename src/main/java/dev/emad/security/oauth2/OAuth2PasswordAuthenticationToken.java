@@ -21,7 +21,7 @@ public class OAuth2PasswordAuthenticationToken extends OAuth2AuthorizationGrantA
       Authentication clientPrincipal,
       Map<String, Object> additionalParameters,
       Set<String> scopes) {
-    super(AuthorizationGrantType.PASSWORD, clientPrincipal, additionalParameters);
+    super(new AuthorizationGrantType("password"), clientPrincipal, additionalParameters);
     this.username = (String) additionalParameters.get("username");
     this.password = (String) additionalParameters.get("password");
     this.scopes = scopes;

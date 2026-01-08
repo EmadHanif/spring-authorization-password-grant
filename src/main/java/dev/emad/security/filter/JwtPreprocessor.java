@@ -1,19 +1,17 @@
 package dev.emad.security.filter;
 
 import dev.emad.entities.User;
-import dev.emad.exceptions.ErrorMessage;
+import dev.emad.exceptions.domain.ErrorMessage;
 import dev.emad.utils.JsonHelper;
-import dev.emad.utils.StringHelper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +22,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -32,8 +31,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class JwtPreprocessor extends OncePerRequestFilter {
 
-  @Autowired private JwtDecoder jwtDecoder;
-  @Autowired private OAuth2AuthorizationService authorizationService;
+  private final JwtDecoder jwtDecoder;
+  private final OAuth2AuthorizationService authorizationService;
+
+  public JwtPreprocessor(JwtDecoder jwtDecoder, OAuth2AuthorizationService authorizationService) {
+    this.jwtDecoder = jwtDecoder;
+    this.authorizationService = authorizationService;
+  }
 
   @Override
   protected void doFilterInternal(
@@ -43,20 +47,19 @@ public class JwtPreprocessor extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     String token = extractToken(req);
-    if (StringHelper.hasText(token)) {
+    if (StringUtils.hasText(token)) {
 
       try {
-
         OAuth2Authorization oAuth2Authorization =
             this.authorizationService.findByToken(token, OAuth2TokenType.ACCESS_TOKEN);
 
-        Assert.notNull(oAuth2Authorization, "Token doesn't exist.");
+        Assert.notNull(oAuth2Authorization, "Token invalid or revoked.");
 
         Jwt decode = jwtDecoder.decode(token);
         Map<String, Object> claims = decode.getClaims();
 
         String email = decode.getSubject();
-        String id = (String) claims.get("id");
+        Long id = (Long) claims.get("id");
         String fullName = (String) claims.get("name");
 
         List<String> authorities =
@@ -68,9 +71,10 @@ public class JwtPreprocessor extends OncePerRequestFilter {
                 : authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
 
         User user = new User();
-        user.setId(UUID.fromString(id));
+        user.setId(id);
         user.setEmail(email);
         user.setFullName(fullName);
+        user.setAuthorities(authoritySet);
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
             new UsernamePasswordAuthenticationToken(user, null, authoritySet);
@@ -91,9 +95,6 @@ public class JwtPreprocessor extends OncePerRequestFilter {
 
   public static String extractToken(HttpServletRequest request) {
     String header = request.getHeader("Authorization");
-    if (Objects.nonNull(header) && header.startsWith("Bearer"))
-      return header.replace("Bearer ", "");
-
-    return null;
+    return (header != null && header.startsWith("Bearer ")) ? header.substring(7) : null;
   }
 }

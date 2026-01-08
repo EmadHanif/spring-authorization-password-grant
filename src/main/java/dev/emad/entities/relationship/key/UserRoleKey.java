@@ -5,8 +5,6 @@ import jakarta.persistence.Embeddable;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,14 +17,14 @@ public class UserRoleKey implements Serializable {
 
   // Use Long & Snowflake-like implementation
   @Column(name = "user_fk", nullable = false)
-  private UUID userId;
+  private Long userId;
 
   @Column(name = "role_fk", nullable = false)
   private Long roleId;
 
   public UserRoleKey() {}
 
-  public UserRoleKey(UUID userId, Long roleId) {
+  public UserRoleKey(Long userId, Long roleId) {
     this.userId = userId;
     this.roleId = roleId;
   }
