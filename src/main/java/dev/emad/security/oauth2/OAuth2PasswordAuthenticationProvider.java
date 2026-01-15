@@ -2,6 +2,7 @@ package dev.emad.security.oauth2;
 
 import java.security.Principal;
 import java.util.*;
+
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -21,6 +22,9 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.util.Assert;
 
+/**
+ * @author EmadHanif
+ */
 public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvider {
 
   private static final String ERROR_URI =
@@ -98,9 +102,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
     if (Objects.isNull(generatedAccessToken)) {
       OAuth2Error error =
           new OAuth2Error(
-              OAuth2ErrorCodes.SERVER_ERROR,
-              "Failed to generate access token.",
-              ERROR_URI);
+              OAuth2ErrorCodes.SERVER_ERROR, "Failed to generate access token.", ERROR_URI);
       throw new OAuth2AuthenticationException(error);
     }
 
@@ -133,9 +135,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
       if (!(generatedRefreshToken instanceof OAuth2RefreshToken)) {
         OAuth2Error error =
             new OAuth2Error(
-                OAuth2ErrorCodes.SERVER_ERROR,
-                "Failed to generate refresh token.",
-                ERROR_URI);
+                OAuth2ErrorCodes.SERVER_ERROR, "Failed to generate refresh token.", ERROR_URI);
         throw new OAuth2AuthenticationException(error);
       }
       refreshToken = (OAuth2RefreshToken) generatedRefreshToken;

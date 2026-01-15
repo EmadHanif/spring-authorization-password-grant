@@ -43,11 +43,6 @@ public class ResourceServerConfig {
   }
 
   @Bean
-  public SecurityContextRepository securityContextRepository() {
-    return new HttpSessionSecurityContextRepository();
-  }
-
-  @Bean
   @Order(2)
   public SecurityFilterChain asResourceFilterChain(
       HttpSecurity http,

@@ -20,6 +20,9 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 
+/**
+ * @author EmadHanif
+ */
 @Configuration
 public class OAuth2ClientInitializer {
 
@@ -62,14 +65,14 @@ public class OAuth2ClientInitializer {
               .authorizationGrantType(new AuthorizationGrantType("password"))
               .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
               .redirectUris(
-                  uris -> uris.addAll(springConfigProperties.getSecurity().getRedirectUris()))
+                  uris -> uris.addAll(this.springConfigProperties.getSecurity().getRedirectUris()))
               .scope(OidcScopes.OPENID)
               .scope("user")
               .tokenSettings(tokenSettings)
               .clientSettings(clientSettings)
               .build();
 
-      registeredClientRepository.save(registeredClient);
+      this.registeredClientRepository.save(registeredClient);
     }
 
     // For ROLE_ADMIN and creating demo user i.e., david_freed@gmail.com

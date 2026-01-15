@@ -8,6 +8,9 @@ import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @author EmadHanif
+ */
 @Embeddable
 @Getter
 @Setter

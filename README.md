@@ -35,13 +35,13 @@ If you're using MySQL, apply the following changes to the schema file before exe
 
 To generate a Java Keystore file for signing JWT, use the following command with your own values:
 
-```
+```bash
 keytool -genkeypair -alias myalias -keyalg RSA -keysize 2048 -keystore mykeystore.jks -storepass mypassword -validity 3650
 ```
 
 After generating the keystore, update the following properties in `application.properties`:
 
-```
+```properties
 jwt.keystore.jks-location=keystore/[JWK_FILE].jks
 jwt.keystore.keypair-alias=[JWK_ALIAS]
 jwt.keystore.password=[JWK_PASSWORD]
@@ -122,7 +122,7 @@ curl --request GET \
   --header 'authorization: Bearer {{access_token}}'
 ```
 
-`m3()` is a reactive endpoint that returns RxJava `Single`, demonstrating reactive execution within an OAuth 2.0 secured context. Also requires a valid access token with scope `user` and role `ROLE_ADMIN`.
+RxJava `Single`. Requires a valid access token with scope `user` and role `ROLE_ADMIN`.
 
 ## Acknowledgement
 
