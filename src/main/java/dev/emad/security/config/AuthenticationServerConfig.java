@@ -38,6 +38,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.jackson.CoreJacksonModule;
 import org.springframework.security.jackson.SecurityJacksonModules;
 import org.springframework.security.oauth2.core.OAuth2Token;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.*;
@@ -202,29 +203,24 @@ public class AuthenticationServerConfig {
   @Bean
   public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
     return context -> {
-      Authentication authentication = context.getPrincipal();
+      if (!OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) return;
 
-      UsernamePasswordAuthenticationToken authenticationToken = context.getPrincipal();
+      Authentication principal = context.getPrincipal();
 
-      if (authenticationToken.getPrincipal() instanceof User) {
+      // Optional...
+      if (!(principal instanceof UsernamePasswordAuthenticationToken authenticationToken)) return;
+      if (!(authenticationToken.getPrincipal() instanceof User user)) return;
 
-        User user = (User) authentication.getPrincipal();
+      Set<String> authorities =
+          Optional.of(authenticationToken.getAuthorities()).orElse(Collections.emptySet()).stream()
+              .map(GrantedAuthority::getAuthority)
+              .collect(Collectors.toSet());
 
-        Set<String> authorities =
-            Optional.of(authenticationToken.getAuthorities())
-                .orElse(Collections.emptySet())
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toSet());
-
-        if (context.getTokenType().getValue().equals("access_token")) {
-          context
-              .getClaims()
-              .claim("authorities", authorities)
-              .claim("id", user.getId())
-              .claim("name", user.getFullName());
-        }
-      }
+      context
+          .getClaims()
+          .claim("authorities", authorities)
+          .claim("id", Objects.requireNonNull(user.getId()))
+          .claim("name", user.getFullName());
     };
   }
 
