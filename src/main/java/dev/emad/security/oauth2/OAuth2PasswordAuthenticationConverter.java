@@ -2,6 +2,8 @@ package dev.emad.security.oauth2;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -23,57 +25,29 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
   private static final String GRANT_TYPE_PASSWORD = "password";
 
   @Override
-  public Authentication convert(HttpServletRequest request) {
+  public Authentication convert(@NonNull HttpServletRequest request) {
 
     String grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
 
-    // Early exit for non-password grant types
+    // Early-exit if the grant_type is not password
+    // Return null instead of throwing; let other converters try
     if (!GRANT_TYPE_PASSWORD.equals(grantType)) {
-      throw new OAuth2AuthenticationException(
-          new OAuth2Error(OAuth2ErrorCodes.UNSUPPORTED_GRANT_TYPE),
-          "The grant type is not supported.");
+      return null;
     }
 
     MultiValueMap<String, String> parameters = getParameters(request);
 
-    // username (mandatory, single-valued)
-    String username = parameters.getFirst(PARAMETER_USERNAME);
-    if (!StringUtils.hasText(username)
-        || parameters.get(PARAMETER_USERNAME) == null
-        || parameters.get(PARAMETER_USERNAME).size() != 1) {
-      throw new OAuth2AuthenticationException(
-          new OAuth2Error(
-              OAuth2ErrorCodes.INVALID_REQUEST,
-              "The 'username' parameter is required and must appear exactly once.",
-              null));
-    }
+    // Validate required parameters (username, password, scope)
+    Map<String, String> params =
+        validateRequiredParameters(
+            parameters, PARAMETER_USERNAME, PARAMETER_PASSWORD, OAuth2ParameterNames.SCOPE);
 
-    // password (mandatory, single-valued)
-    String password = parameters.getFirst(PARAMETER_PASSWORD);
-    if (!StringUtils.hasText(password)
-        || parameters.get(PARAMETER_PASSWORD) == null
-        || parameters.get(PARAMETER_PASSWORD).size() != 1) {
-      throw new OAuth2AuthenticationException(
-          new OAuth2Error(
-              OAuth2ErrorCodes.INVALID_REQUEST,
-              "The 'password' parameter is required and must appear exactly once.",
-              null));
-    }
-
-    // scope (mandatory, single-valued)
-    String scope = parameters.getFirst(OAuth2ParameterNames.SCOPE);
-    if (!StringUtils.hasText(scope)
-        || parameters.get(OAuth2ParameterNames.SCOPE) == null
-        || parameters.get(OAuth2ParameterNames.SCOPE).size() != 1) {
-      throw new OAuth2AuthenticationException(
-          new OAuth2Error(
-              OAuth2ErrorCodes.INVALID_REQUEST,
-              "The 'scope' parameter is required and must appear exactly once.",
-              null));
-    }
-
-    Set<String> requestedScopes =
-        new HashSet<>(Arrays.asList(StringUtils.delimitedListToStringArray(scope, " ")));
+    // Parse scopes - use space " " as delimiter (OAuth2 spec)
+    Set<String> scopes =
+        new HashSet<>(
+            Arrays.asList(
+                StringUtils.delimitedListToStringArray(
+                    params.get(OAuth2ParameterNames.SCOPE), " ")));
 
     Map<String, Object> additionalParameters = new HashMap<>();
     parameters.forEach(
@@ -85,8 +59,29 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
         });
 
     Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
-    return new OAuth2PasswordAuthenticationToken(
-        clientPrincipal, additionalParameters, requestedScopes);
+    return new OAuth2PasswordAuthenticationToken(clientPrincipal, additionalParameters, scopes);
+  }
+
+  public static Map<String, String> validateRequiredParameters(
+      MultiValueMap<String, String> parameters, String... requiredParameters) {
+
+    Map<String, String> validatedValues = new HashMap<>();
+
+    for (String param : requiredParameters) {
+      List<String> values = parameters.get(param);
+
+      if (values == null || values.size() != 1 || !StringUtils.hasText(values.getFirst())) {
+        throw new OAuth2AuthenticationException(
+            new OAuth2Error(
+                OAuth2ErrorCodes.INVALID_REQUEST,
+                "The '" + param + "' parameter is required and must appear exactly once.",
+                OAuth2PasswordAuthenticationProvider.ERROR_URI));
+      }
+
+      validatedValues.put(param, values.getFirst());
+    }
+
+    return validatedValues;
   }
 
   private static MultiValueMap<String, String> getParameters(HttpServletRequest request) {
@@ -98,6 +93,7 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
             parameters.add(key, value);
           }
         });
+
     return parameters;
   }
 }
