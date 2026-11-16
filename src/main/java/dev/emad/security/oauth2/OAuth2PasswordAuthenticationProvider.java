@@ -30,8 +30,7 @@ import org.springframework.util.Assert;
  */
 public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvider {
 
-  public static final String ERROR_URI =
-      "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
+  public static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
 
   private final OAuth2AuthorizationService authorizationService;
   private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
@@ -47,8 +46,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
   }
 
   @Override
-  public Authentication authenticate(@NonNull Authentication authentication)
-      throws AuthenticationException {
+  public Authentication authenticate(@NonNull Authentication authentication) throws AuthenticationException {
 
     // Parse Authentication to OAuth2PasswordAuthenticationToken
     OAuth2PasswordAuthenticationToken authenticationToken =
@@ -59,8 +57,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
 
     Assert.notNull(registeredClient, "The registered client is null.");
 
-    Authentication usernamePasswordAuthentication =
-        getUsernamePasswordAuthentication(authenticationToken);
+    Authentication usernamePasswordAuthentication = getUsernamePasswordAuthentication(authenticationToken);
 
     // Extract authorized scopes from OAuth2PasswordAuthenticationToken
     Set<String> authorizedScopes =
@@ -99,15 +96,13 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
             .attribute(Principal.class.getName(), usernamePasswordAuthentication);
 
     // AccessToken
-    OAuth2TokenContext tokenContext =
-        tokenContextBuilder.tokenType(OAuth2TokenType.ACCESS_TOKEN).build();
+    OAuth2TokenContext tokenContext = tokenContextBuilder.tokenType(OAuth2TokenType.ACCESS_TOKEN).build();
 
     OAuth2Token generatedAccessToken = this.tokenGenerator.generate(tokenContext);
 
     if (Objects.isNull(generatedAccessToken)) {
       throw new OAuth2AuthenticationException(
-          new OAuth2Error(
-              OAuth2ErrorCodes.SERVER_ERROR, "Failed to generate access token.", ERROR_URI));
+          new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR, "Failed to generate access token.", ERROR_URI));
     }
 
     OAuth2AccessToken accessToken =
@@ -120,7 +115,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
 
     authorizationBuilder.token(
         accessToken,
-        (metadata) ->
+        metadata ->
             metadata.put(
                 OAuth2Authorization.Token.CLAIMS_METADATA_NAME,
                 ((ClaimAccessor) generatedAccessToken).getClaims()));
@@ -128,18 +123,14 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
     // RefreshToken
     OAuth2RefreshToken refreshToken = null;
     if (registeredClient.getAuthorizationGrantTypes().contains(AuthorizationGrantType.REFRESH_TOKEN)
-        && !clientPrincipal
-            .getClientAuthenticationMethod()
-            .equals(ClientAuthenticationMethod.NONE)) {
+        && !clientPrincipal.getClientAuthenticationMethod().equals(ClientAuthenticationMethod.NONE)) {
 
       tokenContext = tokenContextBuilder.tokenType(OAuth2TokenType.REFRESH_TOKEN).build();
       OAuth2Token generatedRefreshToken = this.tokenGenerator.generate(tokenContext);
 
-      if (Objects.isNull(generatedRefreshToken)
-          || !(generatedRefreshToken instanceof OAuth2RefreshToken)) {
+      if (Objects.isNull(generatedRefreshToken) || !(generatedRefreshToken instanceof OAuth2RefreshToken)) {
         throw new OAuth2AuthenticationException(
-            new OAuth2Error(
-                OAuth2ErrorCodes.SERVER_ERROR, "Failed to generate refresh token.", ERROR_URI));
+            new OAuth2Error(OAuth2ErrorCodes.SERVER_ERROR, "Failed to generate refresh token.", ERROR_URI));
       }
       refreshToken = (OAuth2RefreshToken) generatedRefreshToken;
       authorizationBuilder.refreshToken(refreshToken);
@@ -157,8 +148,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
     return OAuth2PasswordAuthenticationToken.class.isAssignableFrom(authentication);
   }
 
-  private static OAuth2ClientAuthenticationToken getAuthenticatedClient(
-      Authentication authentication) {
+  private static OAuth2ClientAuthenticationToken getAuthenticatedClient(Authentication authentication) {
 
     Object principal = authentication.getPrincipal();
 
@@ -168,8 +158,7 @@ public class OAuth2PasswordAuthenticationProvider implements AuthenticationProvi
       }
     }
     throw new OAuth2AuthenticationException(
-        new OAuth2Error(
-            OAuth2ErrorCodes.INVALID_CLIENT, "The client is not authenticated", ERROR_URI));
+        new OAuth2Error(OAuth2ErrorCodes.INVALID_CLIENT, "The client is not authenticated", ERROR_URI));
   }
 
   private Authentication getUsernamePasswordAuthentication(

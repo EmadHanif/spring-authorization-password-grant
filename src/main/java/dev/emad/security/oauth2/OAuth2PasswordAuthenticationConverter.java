@@ -46,17 +46,14 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
     Set<String> scopes =
         new HashSet<>(
             Arrays.asList(
-                StringUtils.delimitedListToStringArray(
-                    params.get(OAuth2ParameterNames.SCOPE), " ")));
+                StringUtils.delimitedListToStringArray(params.get(OAuth2ParameterNames.SCOPE), " ")));
 
     Map<String, Object> additionalParameters = new HashMap<>();
-    parameters.forEach(
-        (key, value) -> {
-          if (!key.equals(OAuth2ParameterNames.GRANT_TYPE)
-              && !key.equals(OAuth2ParameterNames.SCOPE)) {
-            additionalParameters.put(key, value.getFirst());
-          }
-        });
+    parameters.forEach((key, value) -> {
+      if (!key.equals(OAuth2ParameterNames.GRANT_TYPE) && !key.equals(OAuth2ParameterNames.SCOPE)) {
+        additionalParameters.put(key, value.getFirst());
+      }
+    });
 
     Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
     return new OAuth2PasswordAuthenticationToken(clientPrincipal, additionalParameters, scopes);
@@ -87,12 +84,11 @@ public class OAuth2PasswordAuthenticationConverter implements AuthenticationConv
   private static MultiValueMap<String, String> getParameters(HttpServletRequest request) {
     Map<String, String[]> parameterMap = request.getParameterMap();
     MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>(parameterMap.size());
-    parameterMap.forEach(
-        (key, values) -> {
-          for (String value : values) {
-            parameters.add(key, value);
-          }
-        });
+    parameterMap.forEach((key, values) -> {
+      for (String value : values) {
+        parameters.add(key, value);
+      }
+    });
 
     return parameters;
   }

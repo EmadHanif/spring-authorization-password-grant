@@ -1,17 +1,18 @@
 package dev.emad.security.filter;
 
+import dev.emad.helper.JsonHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Map;
+
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * @author EmadHanif
@@ -19,27 +20,23 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-  private final ObjectMapper objectMapper;
-
-  public JwtAuthenticationEntryPoint(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
-  }
-
   @Override
   public void commence(
       @NonNull HttpServletRequest request,
       HttpServletResponse response,
-      AuthenticationException exception)
+      @NonNull AuthenticationException exception)
       throws IOException {
 
-    response.setContentType("application/json");
-    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.UNAUTHORIZED, "Authentication is required to access this resource.");
 
-    Map<String, ? extends Serializable> errorMessage =
-        Map.of("message", exception.getMessage(), "timestamp", LocalDateTime.now());
+    problemDetail.setTitle("Unauthorized");
+    problemDetail.setProperty("timestamp", LocalDateTime.now());
 
-    try (OutputStream out = response.getOutputStream()) {
-      objectMapper.writeValue(out, errorMessage);
-    }
+    response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
+    response.getWriter().print(JsonHelper.convertToString(problemDetail));
   }
 }

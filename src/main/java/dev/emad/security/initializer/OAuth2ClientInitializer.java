@@ -1,12 +1,14 @@
 package dev.emad.security.initializer;
 
-import dev.emad.configuration.SpringConfigProperties;
+import dev.emad.core.properties.SpringConfigProperties;
 import dev.emad.entities.Role;
 import dev.emad.entities.User;
 import dev.emad.repositories.RoleRepository;
 import dev.emad.repositories.UserRepository;
 import java.util.Objects;
 import java.util.UUID;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,34 +26,17 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
  * @author EmadHanif
  */
 @Configuration
+@RequiredArgsConstructor
 public class OAuth2ClientInitializer {
 
   private final RegisteredClientRepository registeredClientRepository;
   private final RoleRepository roleRepository;
   private final UserRepository userRepository;
-  private final SpringConfigProperties springConfigProperties;
+  private final SpringConfigProperties properties;
   private final PasswordEncoder passwordEncoder;
   private final ClientSettings clientSettings;
   private final TokenSettings tokenSettings;
 
-  public OAuth2ClientInitializer(
-      RegisteredClientRepository registeredClientRepository,
-      RoleRepository roleRepository,
-      UserRepository userRepository,
-      SpringConfigProperties springConfigProperties,
-      PasswordEncoder passwordEncoder,
-      ClientSettings clientSettings,
-      TokenSettings tokenSettings) {
-    this.registeredClientRepository = registeredClientRepository;
-    this.roleRepository = roleRepository;
-    this.userRepository = userRepository;
-    this.springConfigProperties = springConfigProperties;
-    this.passwordEncoder = passwordEncoder;
-    this.clientSettings = clientSettings;
-    this.tokenSettings = tokenSettings;
-  }
-
-  @Bean
   @EventListener(ApplicationReadyEvent.class)
   public void initializeClients() {
     RegisteredClient existingClient = registeredClientRepository.findByClientId("client");
@@ -64,8 +49,7 @@ public class OAuth2ClientInitializer {
               .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
               .authorizationGrantType(new AuthorizationGrantType("password"))
               .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-              .redirectUris(
-                  uris -> uris.addAll(this.springConfigProperties.getSecurity().getRedirectUris()))
+              .redirectUris(uris -> uris.addAll(this.properties.security().redirectUris()))
               .scope(OidcScopes.OPENID)
               .scope("user")
               .tokenSettings(tokenSettings)
@@ -81,28 +65,26 @@ public class OAuth2ClientInitializer {
     Role role =
         this.roleRepository
             .findByName("ROLE_ADMIN")
-            .orElseGet(
-                () -> {
-                  System.out.println("=== Initializing ROLE_ADMIN ===");
-                  return this.roleRepository.save(new Role("ROLE_ADMIN"));
-                });
+            .orElseGet(() -> {
+              IO.println("=== Initializing ROLE_ADMIN ===");
+              return this.roleRepository.save(new Role("ROLE_ADMIN"));
+            });
 
     this.userRepository
         .findByEmail("david_freed@gmail.com")
-        .orElseGet(
-            () -> {
-              System.out.println("=== Initializing User ===");
-              User user = new User();
-              user.setId(1L);
-              user.setFullName("David Freed");
-              user.setEmail("david_freed@gmail.com");
-              user.setPassword(this.passwordEncoder.encode("adminadmin"));
+        .orElseGet(() -> {
+          IO.println("=== Initializing User ===");
+          User user = new User();
+          user.setId(1L);
+          user.setFullName("David Freed");
+          user.setEmail("david_freed@gmail.com");
+          user.setPassword(this.passwordEncoder.encode("adminadmin"));
 
-              // Add User Role
-              user.addUserRole(role);
+          // Add User Role
+          user.addUserRole(role);
 
-              // Persist
-              return this.userRepository.save(user);
-            });
+          // Persist (a good approach is to create customized impl. via EntityManager)
+          return this.userRepository.save(user);
+        });
   }
 }

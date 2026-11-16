@@ -50,11 +50,7 @@ public class User implements UserDetails, Serializable {
 
   // User Role
   @Getter
-  @OneToMany(
-      fetch = FetchType.LAZY,
-      cascade = CascadeType.ALL,
-      orphanRemoval = true,
-      mappedBy = "user")
+  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
   @JsonIgnore // Added to avoid infinite recursion
   private Set<UserRole> userRoleSet = new HashSet<>();
 
@@ -64,8 +60,7 @@ public class User implements UserDetails, Serializable {
   public Collection<? extends GrantedAuthority> getAuthorities() {
     Set<GrantedAuthority> authorities = new HashSet<>();
     userRoleSet.forEach(
-        user ->
-            authorities.add(new SimpleGrantedAuthority(user.getRole().getName().toUpperCase())));
+        user -> authorities.add(new SimpleGrantedAuthority(user.getRole().getName().toUpperCase())));
     return authorities;
   }
 

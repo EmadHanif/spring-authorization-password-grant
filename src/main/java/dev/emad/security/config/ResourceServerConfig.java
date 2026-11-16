@@ -1,6 +1,6 @@
 package dev.emad.security.config;
 
-import dev.emad.configuration.SpringConfigProperties;
+import dev.emad.core.properties.SpringConfigProperties;
 import dev.emad.security.filter.JwtAuthenticationEntryPoint;
 import dev.emad.security.filter.JwtPreprocessor;
 import java.util.ArrayList;
@@ -31,53 +31,40 @@ import org.springframework.web.filter.CorsFilter;
 @EnableMethodSecurity
 public class ResourceServerConfig {
 
-  private final JwtPreprocessor jwtPreprocessor;
-  private final SpringConfigProperties springConfigProperties;
-
-  public ResourceServerConfig(
-      JwtPreprocessor jwtPreprocessor, SpringConfigProperties springConfigProperties) {
-    this.jwtPreprocessor = jwtPreprocessor;
-    this.springConfigProperties = springConfigProperties;
-  }
-
   @Bean
   @Order(2)
   public SecurityFilterChain asResourceFilterChain(
       HttpSecurity http,
       JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
       JwtAuthenticationConverter jwtAuthenticationConverter,
-      CorsConfigurationSource corsConfiguration) {
-    return http.authorizeHttpRequests(
-            auth ->
-                auth.requestMatchers(HttpMethod.GET, "/api/v1/example/m1")
-                    .permitAll()
-                    .requestMatchers("/api/v1/**")
-                    .hasAuthority("SCOPE_user")
-                    .anyRequest()
-                    .authenticated())
+      CorsConfigurationSource corsConfiguration,
+      JwtPreprocessor jwtPreprocessor) {
+    return http.authorizeHttpRequests(auth ->
+            auth.requestMatchers(HttpMethod.GET, "/api/v1/example/m1")
+                .permitAll()
+                .requestMatchers("/api/v1/**")
+                .hasAuthority("SCOPE_user")
+                .anyRequest()
+                .authenticated())
         .oauth2ResourceServer(
             oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))
-        .sessionManagement(
-            sessionConfigurer ->
-                sessionConfigurer.sessionCreationPolicy(
-                    SessionCreationPolicy.STATELESS)) // session stateless.
+        .sessionManagement(sessionConfigurer ->
+            sessionConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // session stateless.
         .csrf(AbstractHttpConfigurer::disable) // disabling csrf,
         .cors(cors -> cors.configurationSource(corsConfiguration))
         .addFilterBefore(jwtPreprocessor, UsernamePasswordAuthenticationFilter.class)
         .securityContext(configurer -> configurer.requireExplicitSave(false))
         .exceptionHandling(
-            exceptionHandling ->
-                exceptionHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+            exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint))
         .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
         .build();
   }
 
   @Bean
-  public CorsConfigurationSource corsConfiguration() {
+  public CorsConfigurationSource corsConfiguration(SpringConfigProperties properties) {
 
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(
-        new ArrayList<>(springConfigProperties.getSecurity().getCors()));
+    configuration.setAllowedOrigins(new ArrayList<>(properties.security().cors()));
     configuration.setAllowCredentials(true);
     configuration.setAllowedMethods(
         Arrays.asList("GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE", "HEAD"));

@@ -1,17 +1,19 @@
 package dev.emad.security.filter;
 
 import dev.emad.entities.User;
-import dev.emad.exceptions.domain.ErrorMessage;
-import dev.emad.utils.JsonHelper;
+import dev.emad.helper.JsonHelper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,21 +31,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * @author EmadHanif
  */
 @Component
+@RequiredArgsConstructor
 public class JwtPreprocessor extends OncePerRequestFilter {
 
   private final JwtDecoder jwtDecoder;
   private final OAuth2AuthorizationService authorizationService;
 
-  public JwtPreprocessor(JwtDecoder jwtDecoder, OAuth2AuthorizationService authorizationService) {
-    this.jwtDecoder = jwtDecoder;
-    this.authorizationService = authorizationService;
-  }
-
   @Override
   protected void doFilterInternal(
-      @NonNull HttpServletRequest req,
-      @NonNull HttpServletResponse res,
-      @NonNull FilterChain filterChain)
+      @NonNull HttpServletRequest req, @NonNull HttpServletResponse res, @NonNull FilterChain filterChain)
       throws ServletException, IOException {
 
     String token = extractToken(req);
@@ -62,8 +58,7 @@ public class JwtPreprocessor extends OncePerRequestFilter {
         Long id = (Long) claims.get("id");
         String fullName = (String) claims.get("name");
 
-        List<String> authorities =
-            (List<String>) claims.getOrDefault("authorities", Collections.emptyList());
+        List<String> authorities = (List<String>) claims.getOrDefault("authorities", Collections.emptyList());
 
         Set<SimpleGrantedAuthority> authoritySet =
             authorities.isEmpty()
@@ -72,7 +67,7 @@ public class JwtPreprocessor extends OncePerRequestFilter {
 
         User user = new User();
         user.setId(id);
-        user.setEmail(email);
+        user.setEmail(Objects.requireNonNull(email));
         user.setFullName(fullName);
         user.setAuthorities(authoritySet);
 
@@ -81,11 +76,20 @@ public class JwtPreprocessor extends OncePerRequestFilter {
 
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
-      } catch (final Exception e) {
-        ErrorMessage errorResponse = new ErrorMessage(e.getMessage(), LocalDateTime.now());
-        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        res.getWriter().print(JsonHelper.convertToString(errorResponse));
+      } catch (final Exception ex) {
+
+        // Optional (a good prc)
+        SecurityContextHolder.clearContext();
+
+        ProblemDetail problemDetail =
+            ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid or expired access token.");
+        problemDetail.setTitle("Unauthorized");
+        problemDetail.setProperty("timestamp", LocalDateTime.now());
+
+        res.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         res.setStatus(HttpStatus.UNAUTHORIZED.value());
+
+        res.getWriter().print(JsonHelper.convertToString(problemDetail));
         return;
       }
     }
