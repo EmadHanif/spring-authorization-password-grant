@@ -5,6 +5,7 @@ import dev.emad.helper.JsonHelper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -83,13 +84,15 @@ public class JwtPreprocessor extends OncePerRequestFilter {
 
         ProblemDetail problemDetail =
             ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid or expired access token.");
+
         problemDetail.setTitle("Unauthorized");
+        problemDetail.setInstance(URI.create(req.getRequestURI()));
         problemDetail.setProperty("timestamp", LocalDateTime.now());
 
         res.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         res.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-        res.getWriter().print(JsonHelper.convertToString(problemDetail));
+        JsonHelper.writeTo(res.getOutputStream(), problemDetail);
         return;
       }
     }

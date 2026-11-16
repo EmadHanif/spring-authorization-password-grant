@@ -4,6 +4,7 @@ import dev.emad.helper.JsonHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
 import java.time.LocalDateTime;
 
 import org.jspecify.annotations.NonNull;
@@ -32,11 +33,12 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             HttpStatus.UNAUTHORIZED, "Authentication is required to access this resource.");
 
     problemDetail.setTitle("Unauthorized");
+    problemDetail.setInstance(URI.create(request.getRequestURI()));
     problemDetail.setProperty("timestamp", LocalDateTime.now());
 
     response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
     response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-    response.getWriter().print(JsonHelper.convertToString(problemDetail));
+    JsonHelper.writeTo(response.getOutputStream(), problemDetail);
   }
 }

@@ -1,6 +1,8 @@
 package dev.emad.helper;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 import tools.jackson.core.JacksonException;
@@ -11,7 +13,7 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * @author EmadHanif
  */
-public class JsonHelper {
+public final class JsonHelper {
 
   private static final ObjectMapper objectMapper;
 
@@ -20,10 +22,9 @@ public class JsonHelper {
         JsonMapper.builder()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"))
-            .changeDefaultPropertyInclusion(
-                incl ->
-                    incl.withValueInclusion(JsonInclude.Include.NON_NULL)
-                        .withContentInclusion(JsonInclude.Include.NON_NULL))
+            .changeDefaultPropertyInclusion(incl ->
+                incl.withValueInclusion(JsonInclude.Include.NON_NULL)
+                    .withContentInclusion(JsonInclude.Include.NON_NULL))
             .build();
   }
 
@@ -53,6 +54,10 @@ public class JsonHelper {
     } catch (JacksonException e) {
       throw new RuntimeException("Failed to convert Json to object: " + e.getMessage());
     }
+  }
+
+  public static void writeTo(OutputStream outputStream, Object object) throws JacksonException {
+    objectMapper.writeValue(outputStream, object);
   }
 
   public static boolean isValidJson(String jsonString) {
