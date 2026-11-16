@@ -11,9 +11,9 @@ The password grant flow remains widely used in real-world scenarios, particularl
 This project uses PostgreSQL. Update your database configuration in `application-dev.properties` to match your environment:
 
 ```properties
-config.database-config.host=jdbc:postgresql://localhost:5432/[DATABASE_NAME]
-config.database-config.username=postgres
-config.database-config.password=[DATABASE_PASSWORD]
+config.database.host=jdbc:postgresql://localhost:5432/[DATABASE_NAME]
+config.database.username=postgres
+config.database.password=[DATABASE_PASSWORD]
 ```
 
 Replace `[DATABASE_NAME]` and `[DATABASE_PASSWORD]` with your database credentials.
@@ -42,9 +42,9 @@ keytool -genkeypair -alias myalias -keyalg RSA -keysize 2048 -keystore mykeystor
 After generating the keystore, update the following properties in `application.properties`:
 
 ```properties
-jwt.keystore.jks-location=keystore/[JWK_FILE].jks
-jwt.keystore.keypair-alias=[JWK_ALIAS]
-jwt.keystore.password=[JWK_PASSWORD]
+config.jwt-keystore.jks-location=keystore/[JWK_FILE].jks
+config.jwt-keystore.alias=[JWK_ALIAS]
+config.jwt-keystore.password=[JWK_PASSWORD]
 ```
 
 Spring Authorization Server also supports base64-encoded keystore configuration.
